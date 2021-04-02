@@ -1,4 +1,4 @@
-﻿-- Projekt do IDS 2010/21
+-- Projekt do IDS 2010/21
 -- Authors: Prokofiev Oleksandr(xprko40), Pimenov Danylo(xpimen00)
 -- Zadání č. 58. – Fitness Centrum.
 
@@ -140,13 +140,13 @@ VALUES ((SELECT Rodne_cislo FROM Uzivatel WHERE Uzivatel.Rodne_cislo=9504294555)
 
 -- Lekce
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
-VALUES (3, 20, 'Pondělí', '17:30', '19:00', 17.50, 'Box','Crossfit', 9904295555);
+VALUES (3, 20, 'Pondělí', '17:30', '19:00', 17.50, 'Box','Crossfit', 8904253333);
 
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
 VALUES  (1, 2, 'Středa', '12:45', '13:45', 23.99,'Bazen', 'Plávaní', 9804254444);
 
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
-VALUES  (5, 8, 'Streda', '16:45', '17:30', 10, 'Spinning', 'Body_form', 9904295555);
+VALUES  (5, 8, 'Streda', '16:45', '17:30', 10, 'Spinning', 'Body_form', 9504294555);
 
 -- Prihlaseny
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
