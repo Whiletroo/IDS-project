@@ -84,7 +84,7 @@ CREATE TABLE Prihlaseny
     FOREIGN KEY     (Rodne_cislo) REFERENCES Uzivatel(Rodne_cislo)
 );
 
--------------------------------- INSERT ----------------------------------------
+--------------------------------------------- INSERT ------------------------------------------------------
 
 -- Sal
 INSERT INTO Sal(Nazev, Umisteni, Kapacita)
@@ -158,6 +158,7 @@ VALUES (5, 'Body_form', 7303245432);
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
 VALUES (1, 'Plávaní', 5509306665);
 
+--------------------------------------------- SELECT ------------------------------------------------------
 
 -- Informace o lekce kterou vede určitý tréner
 SELECT Kurz, Sal, Poradove_cislo, Cena 
