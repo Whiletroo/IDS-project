@@ -84,7 +84,7 @@ CREATE TABLE Prihlaseny
     FOREIGN KEY     (Rodne_cislo) REFERENCES Uzivatel(Rodne_cislo)
 );
 
--------------------------------- INSERT ----------------------------------------
+--------------------------------------------- INSERT ------------------------------------------------------
 
 -- Sal
 INSERT INTO Sal(Nazev, Umisteni, Kapacita)
@@ -157,3 +157,74 @@ VALUES (5, 'Body_form', 7303245432);
 
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
 VALUES (1, 'Plávaní', 5509306665);
+
+--------------------------------------------- SELECT ------------------------------------------------------
+
+-- Informace o lekce kterou vede určitý tréner
+SELECT Kurz, Sal, Poradove_cislo, Cena 
+FROM Lekce NATURAL JOIN Trener
+WHERE Rodne_cislo = 8904253333
+OR Rodne_cislo = 9504294555
+OR Rodne_cislo = 9804254444;
+
+-- Informace o kurzu, která třetí lekce se odehráva v pondělí a stojí vic než 15 eur
+SELECT Nazev, Kapacita
+FROM Sal
+    NATURAL JOIN Lekce
+    NATURAL JOIN Prihlaseny
+WHERE Cena > 15
+AND Poradi_lekce = 3
+AND Den = 'Pondělí';
+
+-- Informace o trenérovi, který vede lekce Body_form s kapacitou místnosti maximálně 50
+SELECT DISTINCT Jmeno, Prijmeni, Tel_cislo, Mesto
+FROM Uzivatel
+    NATURAL JOIN Trener
+    NATURAL JOIN Sal
+    NATURAL JOIN Lekce
+WHERE Rodne_cislo = 9504294555 
+    AND Kurz = 'Body_form' 
+    AND Kapacita < 50;
+
+-- Vyhleda názvy kurzu, ktoré trvají dele 45 minut
+SELECT Nazev, MAX(Trvani) AS Nejdelsi_kurz
+FROM Kurz
+HAVING MAX(Trvani) > 45
+GROUP BY Nazev;
+
+-- Vyhleda názvy a typ kurzu, ktorý má průměrnou obtiznost menší než 3
+SELECT Nazev, Typ, AVG(Obtiznost) AS Prumerná_obtiznost
+FROM Kurz
+HAVING AVG(Obtiznost) < 3
+GROUP BY Nazev, Typ;
+
+-- Informace o uživatelích která jsou prihlášené na lekce
+SELECT Jmeno, Prijmeni
+FROM Uzivatel
+WHERE EXISTS 
+    (   SELECT Lekce.Rodne_cislo
+        FROM Lekce
+        WHERE Uzivatel.Rodne_cislo = Rodne_cislo
+    );
+
+-- Informace o místnosti ve které se odehráva lekce
+SELECT Nazev, Umisteni, Kapacita
+FROM Sal
+WHERE EXISTS
+    (   SELECT Lekce.Sal
+        FROM Lekce
+        WHERE Sal.Nazev = Sal
+    );
+
+-- Popis kurzu, která lekce začina 12:45 a ní trenér zacina 17:25
+SELECT Popis
+FROM Kurz
+WHERE Nazev IN
+    (
+        SELECT Lekce.Kurz
+        FROM Lekce
+            INNER JOIN Trener
+            ON Lekce.Rodne_cislo = Trener.Rodne_cislo
+        WHERE Trener.Zacatek = '17:25'
+            AND Lekce.Zahajeni = '12:45'
+    );
