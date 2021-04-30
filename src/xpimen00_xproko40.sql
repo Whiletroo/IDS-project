@@ -12,6 +12,7 @@ DROP TABLE Uzivatel;
 DROP TABLE Sal;
 DROP TABLE Kurz;
 
+DROP MATERIALIZED VIEW mat_pohled;
 -------------------------------- CREATE ----------------------------------------
 
 CREATE TABLE Kurz
@@ -83,6 +84,25 @@ CREATE TABLE Prihlaseny
     Rodne_cislo INT,
     FOREIGN KEY     (Rodne_cislo) REFERENCES Uzivatel(Rodne_cislo)
 );
+
+--------------------------------------------- TRIGGER ------------------------------------------------------
+
+-- Vždy v ponděli od 8-9 sa koná úvodni lekce přidaného kurzu
+CREATE TRIGGER Uvodni_lekce
+    AFTER INSERT ON Kurz
+    FOR EACH ROW
+BEGIN
+    INSERT INTO Lekce(Poradi, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz)
+    VALUES (0, 30, 'Pondeli', '8:00', '9:00', 0, 'Box', :NEW.Nazev);
+END;
+
+-- Po ukončení kurzu neni nutné vědet záznam o jeho lekcich
+CREATE TRIGGER Konec_kurzu
+    AFTER DELETE ON Kurz
+    FOR EACH ROW
+BEGIN
+    DELETE FROM Lekce WHERE Lekce.Kurz = :OLD.Nazev;
+END;
 
 --------------------------------------------- INSERT ------------------------------------------------------
 
@@ -228,3 +248,184 @@ WHERE Nazev IN
         WHERE Trener.Zacatek = '17:25'
             AND Lekce.Zahajeni = '12:45'
     );
+
+-- TRIGGER DEMO
+DELETE FROM Kurz WHERE Nazev = 'Crossfit';
+
+-------------------------------------------------- Čast čtvrta ---------------------------------------------------------
+
+-- Procedury a funkce
+
+CREATE OR REPLACE PROCEDURE najdi_uzivatele
+AS
+    prijmeni Uzivatel.Prijmeni%type;
+    ulice Uzivatel.Ulice%type;
+    cislo_domu Uzivatel.Popisne_cislo%type;
+    mesto Uzivatel.Mesto%type;
+    CURSOR cur is SELECT Prijmeni, Ulice, Popisne_cislo, Mesto FROM Uzivatel;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Informáce o pobytu uživatelu, kterých prijmeni je Beznohá.');
+    IF cur %ISOPEN THEN
+        CLOSE cur ;
+    END IF;
+    OPEN cur;
+
+    LOOP
+         FETCH cur INTO prijmeni, ulice, cislo_domu, mesto;
+         EXIT WHEN cur%notfound;
+         IF prijmeni = 'Beznohá' THEN
+             DBMS_OUTPUT.put_line('Uzivatel '|| prijmeni ||'bydli ve meste '|| mesto ||'na ulici '|| ulice ||' '||cislo_domu);
+         END IF;
+    END LOOP;
+    CLOSE cur;
+
+END;
+
+
+CREATE OR REPLACE PROCEDURE celkova_kapacita
+AS
+    CURSOR cur IS SELECT * FROM Sal;
+    curs_var cur%ROWTYPE;
+    celkova_kapacita NUMBER;
+    percent NUMBER;
+BEGIN
+    IF cur %ISOPEN THEN
+        CLOSE cur ;
+    END IF;
+    OPEN cur;
+
+    celkova_kapacita := ziskej_celkovy_pocet();
+
+    LOOP
+        FETCH cur INTO curs_var;
+        EXIT WHEN cur%NOTFOUND;
+        IF curs_var.Kapacita < 60 THEN
+            percent := vypocitej_percent_podilu(celkova_kapacita, curs_var.Kapacita);
+            percent := ROUND(percent);
+            DBMS_OUTPUT.put_line('Sal s kapacitou pod 60 člověk je ' ||curs_var.Nazev|| 's kapacitou ' ||curs_var.Kapacita);
+            DBMS_OUTPUT.put_line('Sal tvorí ' ||percent|| '% z celkove kapacity.');
+        END IF;
+    END LOOP;
+    DBMS_OUTPUT.put_line('Celková kapacita v salech je ' ||celkova_kapacita);
+
+    CLOSE cur;
+END;
+
+
+CREATE OR REPLACE FUNCTION vypocitej_percent_podilu(celkovy_pocet IN NUMBER, jeden_sal IN number)
+RETURN NUMBER
+AS
+    vysledek NUMBER;
+BEGIN
+    vysledek := (jeden_sal * 100) / celkovy_pocet;
+    RETURN vysledek;
+
+    EXCEPTION WHEN zero_divide THEN
+        RETURN 0;
+END;
+
+CREATE OR REPLACE FUNCTION ziskej_celkovy_pocet
+RETURN NUMBER
+AS
+    CURSOR cur IS SELECT Kapacita FROM Sal;
+    celkovy_pocet NUMBER;
+    iter Sal.Kapacita%TYPE;
+BEGIN
+    IF cur %ISOPEN THEN
+        CLOSE cur ;
+    END IF;
+    OPEN cur;
+
+    celkovy_pocet := 0;
+
+    LOOP
+        FETCH cur INTO iter;
+        EXIT WHEN cur%NOTFOUND;
+        celkovy_pocet := celkovy_pocet + iter;
+    END LOOP;
+
+    CLOSE cur;
+
+    RETURN celkovy_pocet;
+END;
+
+
+CALL najdi_uzivatele();
+CALL celkova_kapacita();
+
+
+-- Explain plan
+
+EXPLAIN PLAN FOR
+SELECT
+    Nazev, Typ, AVG(Obtiznost) AS prumerna_obtiznost
+FROM
+    Kurz
+HAVING AVG(Obtiznost) < 3
+
+GROUP BY Nazev, Typ;
+
+SELECT * FROM TABLE(dbms_xplan.display);
+
+
+EXPLAIN PLAN FOR
+SELECT
+    Rodne_cislo, Poradi, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
+FROM
+    Lekce
+    NATURAL JOIN Prihlaseny
+HAVING AVG(Cena) < 10
+
+GROUP BY
+    Rodne_cislo, Poradi, Kurz, Den;
+
+SELECT * FROM TABLE(dbms_xplan.display);
+
+-- Explain plan s pouzitim indexu
+
+CREATE INDEX idx ON Prihlaseny(Rodne_cislo);
+
+EXPLAIN PLAN FOR
+SELECT
+    Rodne_cislo, Poradi, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
+FROM
+    Lekce
+    NATURAL JOIN Prihlaseny
+HAVING AVG(Cena) < 10
+
+GROUP BY
+    Rodne_cislo, Poradi, Kurz, Den;
+
+SELECT * FROM TABLE(dbms_xplan.display);
+
+DROP INDEX idx;
+
+
+-- Prideleni prav
+
+GRANT ALL ON Uzivatel TO XPROKO40;
+GRANT ALL ON Kurz TO XPROKO40;
+GRANT ALL ON Lekce TO XPROKO40;
+GRANT ALL ON Sal TO XPROKO40;
+GRANT ALL ON Trener TO XPROKO40;
+GRANT ALL ON Prihlaseny TO XPROKO40;
+
+GRANT EXECUTE ON najdi_uzivatele TO XPROKO40;
+GRANT EXECUTE ON celkova_kapacita TO XPROKO40;
+GRANT EXECUTE ON ziskej_celkovy_pocet TO XPROKO40;
+GRANT EXECUTE ON vypocitej_percent_podilu TO XPROKO40;
+
+
+-- Vytvoreni materializovaneho pohledu
+
+CREATE MATERIALIZED VIEW mat_pohled
+
+NOLOGGING
+CACHE
+BUILD IMMEDIATE
+REFRESH ON COMMIT
+
+AS
+    SELECT Jmeno, Prijmeni FROM Uzivatel o JOIN Trener t ON o.Rodne_cislo = t.Rodne_cislo;
+
+GRANT ALL ON mat_pohled TO XPROKO40;
