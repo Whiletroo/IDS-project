@@ -1,6 +1,6 @@
 -- Projekt do IDS 2010/21
 -- Authors: Prokofiev Oleksandr(xprko40), Pimenov Danylo(xpimen00)
--- Zadání č. 58. – Fitness Centrum.
+-- Zad?n? ?. 58. – Fitness Centrum.
 
 
 -------------------------------- DROP ------------------------------------------
@@ -86,15 +86,15 @@ CREATE TABLE Prihlaseny
 );
 
 --------------------------------------------- TRIGGER ------------------------------------------------------
-
 -- Vždy v ponděli od 8-9 sa koná úvodni lekce přidaného kurzu
 CREATE TRIGGER Uvodni_lekce
     AFTER INSERT ON Kurz
     FOR EACH ROW
 BEGIN
-    INSERT INTO Lekce(Poradi, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz)
+    INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz)
     VALUES (0, 30, 'Pondeli', '8:00', '9:00', 0, 'Box', :NEW.Nazev);
 END;
+/
 
 -- Po ukončení kurzu neni nutné vědet záznam o jeho lekcich
 CREATE TRIGGER Konec_kurzu
@@ -103,6 +103,7 @@ CREATE TRIGGER Konec_kurzu
 BEGIN
     DELETE FROM Lekce WHERE Lekce.Kurz = :OLD.Nazev;
 END;
+/
 
 --------------------------------------------- INSERT ------------------------------------------------------
 
@@ -121,23 +122,23 @@ VALUES ('Posilovna', 'C05', 100);
 
 -- Kurz
 INSERT INTO Kurz(Nazev, Typ, Obtiznost, Trvani, Kapacita, Popis)
-VALUES ('Crossfit', 'Pokročilý/Hybrid', 4, 90, 20, 'Kurz pro pokročilých, zaměřený na spodní čast těla.');
+VALUES ('Crossfit', 'Pokro?il?/Hybrid', 4, 90, 20, 'Kurz pro pokro?il?ch, zam??en? na spodn? ?ast t?la.');
 
 INSERT INTO Kurz(Nazev, Typ, Obtiznost, Trvani, Kapacita, Popis)
-VALUES ('Body_form', 'Začatečník/Ženy', 2, 45, 40, 'Základný kurz pro ženy zaměřený na precvičení celého tela.');
+VALUES ('Body_form', 'Za?ate?n?k/?eny', 2, 45, 40, 'Z?kladn? kurz pro ?eny zam??en? na precvi?en? cel?ho tela.');
 
 INSERT INTO Kurz(Nazev, Typ, Obtiznost, Trvani, Kapacita, Popis)
-VALUES ('Plávaní', 'Středně_pokročilý/Muži', 3, 60, 30, 'Kurz pro středně pokročilých plavcí.');
+VALUES ('Pl?van?', 'St?edn?_pokro?il?/Mu?i', 3, 60, 30, 'Kurz pro st?edn? pokro?il?ch plavc?.');
 
 -- Uzivatel
 INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popisne_cislo, Mesto, PSC)
-VALUES (8904253333, 'Peter', 'Bezbohý', '+421949503611', 'bezbohy@seznam.cz',  'Nekonečná', 42, 'Brno', 12154);
+VALUES (8904253333, 'Peter', 'Bezboh?', '+421949503611', 'bezbohy@seznam.cz',  'Nekone?n?', 42, 'Brno', 12154);
 
 INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popisne_cislo, Mesto, PSC)
-VALUES (9804254444, 'Ignác', 'Bezruký', '+420901504411', 'bezruky@bez.ruk', 'Konečná', 24, 'Praha', 985201);
+VALUES (9804254444, 'Ign?c', 'Bezruk?', '+420901504411', 'bezruky@bez.ruk', 'Kone?n?', 24, 'Praha', 985201);
 
 INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popisne_cislo, Mesto, PSC)
-VALUES (9504294555, 'Violeta', 'Beznohá', '+421967999976', 'beznoha@gmail.com', 'Začatečná', 420, 'Bratislava', 62101);
+VALUES (9504294555, 'Violeta', 'Beznoh?', '+421967999976', 'beznoha@gmail.com', 'Za?ate?n?', 420, 'Bratislava', 62101);
 
 INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popisne_cislo, Mesto, PSC)
 VALUES (2504232844, 'Volodymyr', 'Zelensky', '+380442557333', 'mr.president@ukrnet.ua', 'Bankova', 11, 'Kyiv', 01001);
@@ -146,7 +147,7 @@ INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popis
 VALUES (7303245432, 'Charlie', 'Sheen', '+300458735298', 'sharlie@cheen.com', 'Palms Spring', 420, 'Miami', 100000);
 
 INSERT INTO Uzivatel(Rodne_cislo, Jmeno, Prijmeni, Tel_cislo, Mail, Ulice, Popisne_cislo, Mesto, PSC)
-VALUES (5509306665, 'Arnold', 'Švarceneger', '+100432768467', 'iron@arnold.com', 'Unknown', 300, 'Pezinok', 97893);
+VALUES (5509306665, 'Arnold', '?varceneger', '+100432768467', 'iron@arnold.com', 'Unknown', 300, 'Pezinok', 97893);
 
 -- Trener
 INSERT INTO Trener(Rodne_cislo, Zacatek, Konec)
@@ -160,26 +161,25 @@ VALUES ((SELECT Rodne_cislo FROM Uzivatel WHERE Uzivatel.Rodne_cislo=9504294555)
 
 -- Lekce
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
-VALUES (3, 20, 'Pondělí', '17:30', '19:00', 17.50, 'Box','Crossfit', 8904253333);
+VALUES (3, 20, 'Pond?l?', '17:30', '19:00', 17.50, 'Box','Crossfit', 8904253333);
 
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
-VALUES  (1, 2, 'Středa', '12:45', '13:45', 23.99,'Bazen', 'Plávaní', 9804254444);
+VALUES  (1, 2, 'St?eda', '12:45', '13:45', 23.99,'Bazen', 'Pl?van?', 9804254444);
 
 INSERT INTO Lekce(Poradove_cislo, Mista, Den, Zahajeni, Ukonceni, Cena, Sal, Kurz, Rodne_cislo)
 VALUES  (5, 8, 'Streda', '16:45', '17:30', 10, 'Spinning', 'Body_form', 9504294555);
 
 -- Prihlaseny
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
-VALUES (1, 'Plávaní', 2504232844);
+VALUES (1, 'Pl?van?', 2504232844);
 
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
 VALUES (5, 'Body_form', 7303245432);
 
 INSERT INTO  Prihlaseny(Poradi_lekce, Nazev_kurzu, Rodne_cislo)
-VALUES (1, 'Plávaní', 5509306665);
+VALUES (1, 'Pl?van?', 5509306665);
 
 --------------------------------------------- SELECT ------------------------------------------------------
-
 -- Informace o lekce kterou vede určitý tréner
 SELECT Kurz, Sal, Poradove_cislo, Cena 
 FROM Lekce NATURAL JOIN Trener
@@ -213,7 +213,7 @@ HAVING MAX(Trvani) > 45
 GROUP BY Nazev;
 
 -- Vyhleda názvy a typ kurzu, ktorý má průměrnou obtiznost menší než 3
-SELECT Nazev, Typ, AVG(Obtiznost) AS Prumerná_obtiznost
+SELECT Nazev, Typ, AVG(Obtiznost) AS Prumerna_obtiznost
 FROM Kurz
 HAVING AVG(Obtiznost) < 3
 GROUP BY Nazev, Typ;
@@ -248,14 +248,12 @@ WHERE Nazev IN
         WHERE Trener.Zacatek = '17:25'
             AND Lekce.Zahajeni = '12:45'
     );
-
--- TRIGGER DEMO
+    
+    -- TRIGGER DEMO
 DELETE FROM Kurz WHERE Nazev = 'Crossfit';
-
--------------------------------------------------- Čast čtvrta ---------------------------------------------------------
+-------------------------------------------------- ?ast ?tvrta ---------------------------------------------------------
 
 -- Procedury a funkce
-
 CREATE OR REPLACE PROCEDURE najdi_uzivatele
 AS
     prijmeni Uzivatel.Prijmeni%type;
@@ -280,7 +278,7 @@ BEGIN
     CLOSE cur;
 
 END;
-
+/
 
 CREATE OR REPLACE PROCEDURE celkova_kapacita
 AS
@@ -310,7 +308,7 @@ BEGIN
 
     CLOSE cur;
 END;
-
+/
 
 CREATE OR REPLACE FUNCTION vypocitej_percent_podilu(celkovy_pocet IN NUMBER, jeden_sal IN number)
 RETURN NUMBER
@@ -323,6 +321,7 @@ BEGIN
     EXCEPTION WHEN zero_divide THEN
         RETURN 0;
 END;
+/
 
 CREATE OR REPLACE FUNCTION ziskej_celkovy_pocet
 RETURN NUMBER
@@ -348,6 +347,7 @@ BEGIN
 
     RETURN celkovy_pocet;
 END;
+/
 
 
 CALL najdi_uzivatele();
@@ -370,14 +370,14 @@ SELECT * FROM TABLE(dbms_xplan.display);
 
 EXPLAIN PLAN FOR
 SELECT
-    Rodne_cislo, Poradi, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
+    Rodne_cislo, Poradove_cislo, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
 FROM
     Lekce
     NATURAL JOIN Prihlaseny
 HAVING AVG(Cena) < 10
 
 GROUP BY
-    Rodne_cislo, Poradi, Kurz, Den;
+    Rodne_cislo, Poradove_cislo, Kurz, Den;
 
 SELECT * FROM TABLE(dbms_xplan.display);
 
@@ -387,19 +387,18 @@ CREATE INDEX idx ON Prihlaseny(Rodne_cislo);
 
 EXPLAIN PLAN FOR
 SELECT
-    Rodne_cislo, Poradi, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
+    Rodne_cislo, Poradove_cislo, Kurz, Den, AVG(Cena) AS prumerna_cena_lekce
 FROM
     Lekce
     NATURAL JOIN Prihlaseny
 HAVING AVG(Cena) < 10
 
 GROUP BY
-    Rodne_cislo, Poradi, Kurz, Den;
+    Rodne_cislo, Poradove_cislo, Kurz, Den;
 
 SELECT * FROM TABLE(dbms_xplan.display);
 
 DROP INDEX idx;
-
 
 -- Prideleni prav
 
@@ -429,3 +428,4 @@ AS
     SELECT Jmeno, Prijmeni FROM Uzivatel o JOIN Trener t ON o.Rodne_cislo = t.Rodne_cislo;
 
 GRANT ALL ON mat_pohled TO XPROKO40;
+/******************** End od file ********************/
